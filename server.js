@@ -5,7 +5,8 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./db/connect.js";
-import blogRoutes from "./routes/blogRoute.js";
+import blogRoute from "./routes/blogRoute.js";
+import authRoute from "./routes/authRoute.js";
 
 dotenv.config();
 
@@ -21,7 +22,8 @@ if (process.env.NODE_ENV === "development") {
 }
 
 //routes middleware
-app.use("/api", blogRoutes);
+app.use("/api/blog", blogRoute);
+app.use("/api/auth", authRoute);
 
 //routes
 const port = process.env.PORT || 5000;
