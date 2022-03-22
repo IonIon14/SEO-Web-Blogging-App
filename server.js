@@ -7,6 +7,9 @@ import dotenv from "dotenv";
 import connectDB from "./db/connect.js";
 import blogRoute from "./routes/blogRoute.js";
 import authRoute from "./routes/authRoute.js";
+import notFoundMiddleware from "./middlewares/NotFound.js";
+import errorHandlerMiddleware from "./middlewares/ErrorHandler.js";
+import authenticateUser from "./middlewares/auth.js";
 
 dotenv.config();
 
@@ -22,9 +25,11 @@ if (process.env.NODE_ENV === "development") {
 }
 
 //routes middleware
-app.use("/api/blog", blogRoute);
+app.use("/api/blog", authenticateUser, blogRoute);
 app.use("/api/auth", authRoute);
 
+app.use(notFoundMiddleware);
+app.use(errorHandlerMiddleware);
 //routes
 const port = process.env.PORT || 5000;
 
