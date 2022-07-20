@@ -5,8 +5,13 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./db/connect.js";
+
 import blogRoute from "./routes/blogRoute.js";
 import authRoute from "./routes/authRoute.js";
+import userRoute from "./routes/userRoute.js";
+import categoryRoute from "./routes/categoryRoute.js";
+import tagRoute from "./routes/tagRoute.js";
+
 import notFoundMiddleware from "./middlewares/NotFound.js";
 import errorHandlerMiddleware from "./middlewares/ErrorHandler.js";
 import authenticateUser from "./middlewares/auth.js";
@@ -25,8 +30,11 @@ if (process.env.NODE_ENV === "development") {
 }
 
 //routes middleware
-app.use("/api/blog", authenticateUser, blogRoute);
-app.use("/api/auth", authRoute);
+app.use("/api", blogRoute);
+app.use("/api", authRoute);
+app.use("/api", userRoute);
+app.use("/api", categoryRoute);
+app.use("/api", tagRoute);
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);

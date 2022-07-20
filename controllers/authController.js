@@ -9,22 +9,24 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const signUp = (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, role } = req.body;
 
   if (!name || !email || !password) {
     throw new BadRequestError("please provide all values");
   }
+
   User.findOne({ email }).exec((err, user) => {
     if (user) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
+      return res.status(400).json({
         error: "Email is taken",
       });
     }
   });
+
   let username = shortid.generate();
   let profile = `${process.env.CLIENT_URL}/profile/${username}`;
 
-  let newUser = new User({ name, email, password, profile, username });
+  let newUser = new User({ name, email, password, profile, username, role });
 
   newUser.save((err, success) => {
     if (err) {
@@ -91,7 +93,44 @@ const signOut = (req, res) => {
 const requireSignin = expressJwt({
   secret: process.env.JWT_SECRET,
   algorithms: ["HS256"], // added later
-  userProperty: "auth",
 });
 
-export { signUp, signIn, signOut, requireSignin };
+const authMiddleware = (req, res, next) => {
+  const authUserId = req.user._id;
+  User.findById({ _id: authUserId }).exec((err, user) => {
+    if (err || !user) {
+      return res.status(400).json({
+        error: "User not found",
+      });
+    }
+    req.profile = user;
+    next();
+  });
+};
+
+const adminMiddleware = (req, res, next) => {
+  const adminUserId = req.user._id;
+  User.findById({ _id: adminUserId }).exec((err, user) => {
+    if (err || !user) {
+      return res.status(400).json({
+        error: "User not found",
+      });
+    }
+    if (user.role !== 1) {
+      return res.status(400).json({
+        error: "Admin resource. Access denied",
+      });
+    }
+    req.profile = user;
+    next();
+  });
+};
+
+export {
+  signUp,
+  signIn,
+  signOut,
+  requireSignin,
+  authMiddleware,
+  adminMiddleware,
+};
